@@ -1,5 +1,7 @@
 # Cascade
 
+[![Upload Python Package](https://github.com/XGCascade/cascade/actions/workflows/python-publish.yml/badge.svg?branch=main&event=check_run)](https://github.com/XGCascade/cascade/actions/workflows/python-publish.yml)
+
 Cascade is a lightweight, explicit runtime validation framework for Python.
 
 It is designed for developers who want **predictable validation**, **minimal magic**, and a **clean separation of concerns**.
