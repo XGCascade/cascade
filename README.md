@@ -224,11 +224,12 @@ That is a feature, not a limitation.
 
 ---
 
-## Stability and Versioning
+## Stability
 
-- Core APIs are frozen for v1
-- Breaking changes will only occur in major versions
-- Anything not exported via the public API may change without notice
+Cascade v1.0.0 is the first stable release.
+
+Core APIs are considered frozen for the v1 series.
+Breaking changes will only occur in major versions.
 
 ---
 

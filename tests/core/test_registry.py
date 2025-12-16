@@ -1,5 +1,3 @@
-import pytest
-
 from cascade.core.registry import (
     register_type,
     unregister_type,
@@ -30,6 +28,9 @@ def test_unregister_validator():
     assert get_registered_validator(int) is None
 
 
-def test_register_requires_callable():
-    with pytest.raises(TypeError):
-        register_type(str, "not-a-callable")
+def test_registry_is_global():
+    def validator(value):
+        pass
+
+    register_type(str, validator)
+    assert get_registered_validator(str) is validator

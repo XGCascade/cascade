@@ -1,14 +1,14 @@
 """
 Core type checking logic for Cascade.
 
-This module provides deterministic runtime type checking based on Python's
-type system and typing hints. It intentionally does not perform coercion,
-rule evaluation, or context-based behavior.
+This module provides deterministic runtime type validation based on
+Python's type system and typing constructs.
 
-Design goals:
-- Pure and predictable type checking
-- No implicit coercion or side effects
-- No dependency on higher-level Cascade features
+Design constraints:
+- Always strict
+- No coercion
+- No rule execution
+- No context awareness
 """
 
 from typing import Any, get_args, get_origin, Union
@@ -17,17 +17,14 @@ from cascade.core.errors import TypeValidationError
 from cascade.core.registry import get_registered_validator
 
 
-def validate_type(
-    value: Any,
-    expected_type: Any,
-    *,
-    strict: bool = True,
-) -> bool:
+def validate_type(value: Any, expected_type: Any) -> bool:
     """
     Validate a value against an expected type.
 
-    This function raises an exception on failure and returns True on success.
-    It does not perform coercion and does not evaluate validation rules.
+    This function is strictly deterministic:
+    - No coercion is performed
+    - No implicit behavior exists
+    - Validation either passes or raises TypeValidationError
 
     Parameters
     ----------
@@ -35,8 +32,6 @@ def validate_type(
         The value to be validated.
     expected_type:
         The expected Python type or typing construct.
-    strict:
-        Reserved for future extension. Currently enforced as strict behavior.
 
     Returns
     -------
@@ -46,7 +41,7 @@ def validate_type(
     Raises
     ------
     TypeValidationError
-        If the value does not match the expected type.
+        If the value does not satisfy the expected type.
     """
     _check_type(value, expected_type)
     return True
@@ -55,9 +50,6 @@ def validate_type(
 def _check_type(value: Any, expected_type: Any) -> None:
     """
     Internal dispatcher for type checking.
-
-    This function selects the appropriate checking strategy based on
-    the nature of the expected type.
     """
     if expected_type is Any:
         return
@@ -81,9 +73,6 @@ def _check_type(value: Any, expected_type: Any) -> None:
 
 
 def _check_builtin_type(value: Any, expected_type: Any) -> None:
-    """
-    Check a value against a non-generic, non-typing type.
-    """
     if not isinstance(value, expected_type):
         raise TypeValidationError(
             value=value,
@@ -92,9 +81,6 @@ def _check_builtin_type(value: Any, expected_type: Any) -> None:
 
 
 def _check_union_type(value: Any, expected_type: Any) -> None:
-    """
-    Check a value against a Union type.
-    """
     for option in get_args(expected_type):
         try:
             _check_type(value, option)
@@ -109,9 +95,6 @@ def _check_union_type(value: Any, expected_type: Any) -> None:
 
 
 def _check_generic_type(value: Any, expected_type: Any, origin: Any) -> None:
-    """
-    Check a value against a generic typing construct such as List[T] or Dict[K, V].
-    """
     if not isinstance(value, origin):
         raise TypeValidationError(
             value=value,
@@ -119,7 +102,6 @@ def _check_generic_type(value: Any, expected_type: Any, origin: Any) -> None:
         )
 
     args = get_args(expected_type)
-
     if not args:
         return
 
@@ -131,39 +113,25 @@ def _check_generic_type(value: Any, expected_type: Any, origin: Any) -> None:
         _check_mapping_items(value, args)
         return
 
-    # Fallback: if we do not explicitly support the generic,
-    # we only validate the container type.
-    return
+    # Unsupported generics fall back to container-only validation.
 
 
 def _check_iterable_items(iterable: Any, item_type: Any) -> None:
-    """
-    Validate all items in an iterable against the given item type.
-    """
     for item in iterable:
         _check_type(item, item_type)
 
 
 def _check_mapping_items(mapping: Any, args: tuple) -> None:
-    """
-    Validate all keys and values in a mapping against expected types.
-    """
     if len(args) != 2:
         return
 
     key_type, value_type = args
-
     for key, value in mapping.items():
         _check_type(key, key_type)
         _check_type(value, value_type)
 
 
 def _check_custom_type(value: Any, expected_type: Any, validator) -> None:
-    """
-    Validate a value using a custom registered validator.
-
-    Custom validators must raise TypeValidationError on failure.
-    """
     try:
         validator(value)
     except TypeValidationError:

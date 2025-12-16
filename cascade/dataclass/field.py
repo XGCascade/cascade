@@ -1,19 +1,17 @@
 """
-Field helpers for validated dataclasses.
+Field helpers for Cascade validated dataclasses.
 
-Fields defined here are plain metadata containers.
-They do not execute validation by themselves.
+This module only stores metadata.
+No validation logic is executed here.
 """
 
 from dataclasses import field as dc_field, MISSING
 from typing import Any, Iterable, Optional
 
-from cascade.rules.base import Rule
-
 
 def field(
     *,
-    rules: Optional[Iterable[Rule]] = None,
+    rules: Optional[Iterable[Any]] = None,
     default: Any = MISSING,
     default_factory: Any = MISSING,
 ):
@@ -23,16 +21,12 @@ def field(
     Parameters
     ----------
     rules:
-        Optional iterable of Rule instances to be applied explicitly.
+        Iterable of callable rules.
+        Each rule must expose a 'name' attribute.
     default:
-        Default value for the field.
+        Default field value.
     default_factory:
         Factory for default value.
-
-    Notes
-    -----
-    This function mirrors `dataclasses.field` behavior.
-    It only forwards arguments that are explicitly provided.
     """
     metadata = {}
 

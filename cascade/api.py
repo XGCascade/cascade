@@ -1,24 +1,25 @@
 """
-Public API for Cascade.
+Public API surface for Cascade.
 
-This module defines the officially supported public surface of Cascade.
-Anything not exported here is considered internal and may change
-without notice.
+This module defines the stable and supported entry points of the framework.
+Anything not exported here is considered internal and may change without notice.
 
-Design goals:
-- Small and stable API surface
-- Explicit over implicit behavior
-- Clear separation between core and higher-level features
+Design principles:
+- Explicit over implicit
+- Small and stable API
+- No convenience magic
 """
 
-# Core validation
+# Core type validation
 from cascade.core.types import validate_type
 
-# Core registry and coercion (explicit utilities)
+# Type registry
 from cascade.core.registry import (
     register_type,
     unregister_type,
 )
+
+# Explicit coercion utilities
 from cascade.core.coercion import (
     register_coercer,
     unregister_coercer,
@@ -26,7 +27,7 @@ from cascade.core.coercion import (
     coerce,
 )
 
-# Core errors
+# Error hierarchy
 from cascade.core.errors import (
     CascadeError,
     ValidationError,
@@ -35,7 +36,7 @@ from cascade.core.errors import (
     CoercionError,
 )
 
-# Dataclass utilities (optional sugar)
+# Dataclass execution policy
 from cascade.dataclass import (
     validated_dataclass,
     field,
@@ -49,7 +50,7 @@ __all__ = [
     "register_type",
     "unregister_type",
 
-    # Coercion utilities
+    # Coercion
     "register_coercer",
     "unregister_coercer",
     "can_coerce",
@@ -62,7 +63,7 @@ __all__ = [
     "RuleValidationError",
     "CoercionError",
 
-    # Dataclass sugar
+    # Dataclass utilities
     "validated_dataclass",
     "field",
 ]

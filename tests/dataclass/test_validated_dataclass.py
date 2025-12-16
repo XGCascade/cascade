@@ -1,21 +1,36 @@
 import pytest
+from dataclasses import dataclass
 
 from cascade import validated_dataclass, field
-from cascade.rules import Min
-from cascade.core.errors import RuleValidationError, TypeValidationError
+from cascade.core.errors import (
+    TypeValidationError,
+    RuleValidationError,
+)
 
 
-def test_validated_dataclass_basic_success():
+class GreaterThanZero:
+    name = "greater_than_zero"
+
+    def __call__(self, value):
+        if value <= 0:
+            raise RuleValidationError(
+                value=value,
+                rule_name=self.name,
+                message="Value must be greater than zero.",
+            )
+
+
+def test_validated_dataclass_success():
     @validated_dataclass
     class User:
         id: int
-        age: int = field(rules=[Min(18)])
+        age: int = field(rules=[GreaterThanZero()])
 
-    user = User(id=1, age=20)
-    user.validate()  # should not raise
+    user = User(id=1, age=10)
+    user.validate()
 
 
-def test_type_validation_applied():
+def test_type_validation_applied_first():
     @validated_dataclass
     class User:
         age: int
@@ -29,9 +44,9 @@ def test_type_validation_applied():
 def test_rule_validation_applied_after_type():
     @validated_dataclass
     class User:
-        age: int = field(rules=[Min(18)])
+        age: int = field(rules=[GreaterThanZero()])
 
-    user = User(age=10)
+    user = User(age=0)
 
     with pytest.raises(RuleValidationError):
         user.validate()
@@ -40,13 +55,13 @@ def test_rule_validation_applied_after_type():
 def test_validate_single_field():
     @validated_dataclass
     class User:
-        age: int = field(rules=[Min(18)])
+        age: int = field(rules=[GreaterThanZero()])
         name: str
 
-    user = User(age=20, name="A")
+    user = User(age=10, name="Alice")
 
-    user.validate_field("age")   # passes
-    user.validate_field("name")  # passes
+    user.validate_field("age")
+    user.validate_field("name")
 
 
 def test_validate_field_invalid_name():
@@ -54,7 +69,7 @@ def test_validate_field_invalid_name():
     class User:
         age: int
 
-    user = User(age=20)
+    user = User(age=10)
 
     with pytest.raises(AttributeError):
         user.validate_field("missing")
@@ -63,18 +78,17 @@ def test_validate_field_invalid_name():
 def test_is_valid_returns_false_on_error():
     @validated_dataclass
     class User:
-        age: int = field(rules=[Min(18)])
+        age: int = field(rules=[GreaterThanZero()])
 
-    user = User(age=10)
+    user = User(age=0)
 
     assert user.is_valid() is False
 
 
-def test_no_implicit_validation_on_init():
+def test_no_validation_on_init():
     @validated_dataclass
     class User:
-        age: int = field(rules=[Min(18)])
+        age: int = field(rules=[GreaterThanZero()])
 
-    # This should NOT raise
-    user = User(age=10)
-    assert user.age == 10
+    user = User(age=0)
+    assert user.age == 0

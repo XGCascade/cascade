@@ -1,20 +1,17 @@
 """
 Common built-in validation rules for Cascade.
 
-These rules intentionally cover only basic and widely useful constraints.
+These rules cover basic and widely applicable constraints.
 """
 
 import re
 from typing import Any
 
-
 from cascade.rules.base import Rule
 
 
 class Min(Rule):
-    """
-    Ensure that a numeric value is greater than or equal to a minimum.
-    """
+    """Ensure a numeric value is greater than or equal to a minimum."""
 
     name = "min"
 
@@ -30,9 +27,7 @@ class Min(Rule):
 
 
 class Max(Rule):
-    """
-    Ensure that a numeric value is less than or equal to a maximum.
-    """
+    """Ensure a numeric value is less than or equal to a maximum."""
 
     name = "max"
 
@@ -48,11 +43,7 @@ class Max(Rule):
 
 
 class Length(Rule):
-    """
-    Ensure that a value has a specific length constraint.
-
-    Works with any value supporting `len()`.
-    """
+    """Ensure a value satisfies length constraints."""
 
     name = "length"
 
@@ -64,22 +55,14 @@ class Length(Rule):
         size = len(value)
 
         if self.min is not None and size < self.min:
-            self.fail(
-                value,
-                f"Length {size} is less than minimum {self.min}.",
-            )
+            self.fail(value, f"Length {size} is less than minimum {self.min}.")
 
         if self.max is not None and size > self.max:
-            self.fail(
-                value,
-                f"Length {size} exceeds maximum {self.max}.",
-            )
+            self.fail(value, f"Length {size} exceeds maximum {self.max}.")
 
 
 class Pattern(Rule):
-    """
-    Ensure that a string value matches a regular expression pattern.
-    """
+    """Ensure a string value matches a regular expression."""
 
     name = "pattern"
 

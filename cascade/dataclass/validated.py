@@ -1,16 +1,20 @@
 """
-Validated dataclass decorator for Cascade.
+Validated dataclass support for Cascade.
 
-This decorator adds explicit validation methods to a dataclass.
-Validation is never automatic unless explicitly requested.
+This module provides an explicit execution policy for field validation.
+
+Execution order (fixed for v1):
+1. Type validation
+2. Field rules (in declared order)
+
+Validation is never implicit.
 """
 
 from dataclasses import dataclass, fields
-from typing import Any, Callable, Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from cascade.core.types import validate_type
 from cascade.core.errors import ValidationError
-from cascade.rules.base import Rule
 
 
 T = TypeVar("T")
@@ -18,42 +22,28 @@ T = TypeVar("T")
 
 def validated_dataclass(cls: Type[T]) -> Type[T]:
     """
-    Decorate a dataclass with explicit validation capabilities.
+    Decorate a class as a validated dataclass.
 
-    The resulting class provides:
-    - validate(): validate all fields
-    - validate_field(name): validate a single field
+    The resulting dataclass provides explicit validation methods:
+    - validate()
+    - validate_field(name)
+    - is_valid()
 
-    Validation is explicit and must be called by the user.
+    No validation occurs automatically on initialization or assignment.
     """
     cls = dataclass(cls)
 
     def validate(self) -> None:
-        """
-        Validate all fields on the dataclass instance.
-
-        Raises ValidationError on first failure.
-        """
         for f in fields(self):
             _validate_field(self, f.name)
 
     def validate_field(self, name: str) -> None:
-        """
-        Validate a single field by name.
-
-        Raises ValidationError if validation fails.
-        """
         if not hasattr(self, name):
             raise AttributeError(f"Field '{name}' does not exist.")
 
         _validate_field(self, name)
 
     def is_valid(self) -> bool:
-        """
-        Check whether the dataclass instance is valid.
-
-        Returns False instead of raising on validation error.
-        """
         try:
             self.validate()
             return True
@@ -68,13 +58,6 @@ def validated_dataclass(cls: Type[T]) -> Type[T]:
 
 
 def _validate_field(instance: Any, name: str) -> None:
-    """
-    Internal helper to validate a single field.
-
-    Validation steps:
-    1. Type validation
-    2. Rule validation (if any)
-    """
     value = getattr(instance, name)
     annotation = instance.__annotations__.get(name)
 
@@ -85,6 +68,9 @@ def _validate_field(instance: Any, name: str) -> None:
     rules = field_info.metadata.get("cascade_rules", [])
 
     for rule in rules:
-        if not isinstance(rule, Rule):
-            raise TypeError("Field rules must be Rule instances.")
+        if not callable(rule) or not hasattr(rule, "name"):
+            raise TypeError(
+                "Field rules must be callable and expose a 'name' attribute."
+            )
+
         rule(value)

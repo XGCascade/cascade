@@ -1,8 +1,12 @@
 """
-Base rule definitions for Cascade.
+Base rule definition for Cascade.
 
-A rule is a simple callable object that validates a value
-and raises RuleValidationError on failure.
+A rule is defined as:
+- A callable accepting a single value
+- Raising RuleValidationError on failure
+- Exposing a public 'name' attribute
+
+This class is a reference implementation, not a hard requirement.
 """
 
 from typing import Any
@@ -12,9 +16,9 @@ from cascade.core.errors import RuleValidationError
 
 class Rule:
     """
-    Base class for all validation rules.
+    Reference base class for validation rules.
 
-    Subclasses must implement the `check` method.
+    Subclasses must implement the check() method.
     """
 
     name: str = "rule"
@@ -28,11 +32,13 @@ class Rule:
 
         Must raise RuleValidationError on failure.
         """
-        raise NotImplementedError("Rule.check must be implemented by subclasses.")
+        raise NotImplementedError(
+            "Rule.check() must be implemented by subclasses."
+        )
 
     def fail(self, value: Any, message: str) -> None:
         """
-        Helper method to raise a standardized rule validation error.
+        Raise a standardized rule validation error.
         """
         raise RuleValidationError(
             value=value,

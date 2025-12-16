@@ -11,12 +11,12 @@ def setup_function():
 
 
 def test_builtin_type_success():
-    assert validate_type(1, int) is True
+    assert validate_type(10, int) is True
 
 
 def test_builtin_type_failure():
     with pytest.raises(TypeValidationError):
-        validate_type("1", int)
+        validate_type("10", int)
 
 
 def test_any_type_always_passes():
@@ -25,7 +25,7 @@ def test_any_type_always_passes():
 
 def test_optional_type():
     assert validate_type(None, Optional[int]) is True
-    assert validate_type(10, Optional[int]) is True
+    assert validate_type(5, Optional[int]) is True
 
     with pytest.raises(TypeValidationError):
         validate_type("x", Optional[int])
@@ -49,11 +49,11 @@ def test_custom_registered_type():
     class UserId(int):
         pass
 
-    def user_id_validator(value):
+    def validate_user_id(value):
         if not isinstance(value, UserId):
             raise TypeValidationError(value=value, expected_type=UserId)
 
-    register_type(UserId, user_id_validator)
+    register_type(UserId, validate_user_id)
 
     assert validate_type(UserId(1), UserId) is True
 
