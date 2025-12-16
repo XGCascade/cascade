@@ -31,7 +31,7 @@ It solves a different problem with a smaller and more controlled scope.
 ## Installation
 
 ```bash
-pip install --pre cascade
+pip install cascade-framework
 ```
 
 Cascade requires **Python 3.10+**.
