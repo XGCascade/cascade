@@ -228,7 +228,7 @@ That is a feature, not a limitation.
 
 ## Stability
 
-Cascade v1.0.0 is the first stable release.
+Cascade v1.0.1 is the first stable release.
 
 Core APIs are considered frozen for the v1 series.
 Breaking changes will only occur in major versions.
