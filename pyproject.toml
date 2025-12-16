@@ -3,13 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cascade"
+name = "cascade-framework"
 version = "1.0.0a1"
 description = "Explicit, minimal runtime validation framework for Python"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Cascade Team", email = "cascade.team@protonmail.me" }
+    { name = "XGCascade", email = "cascade.framework@proton.me" }
 ]
 requires-python = ">=3.10"
 dependencies = []
